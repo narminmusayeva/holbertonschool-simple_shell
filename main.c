@@ -1,50 +1,50 @@
-#include "shell.h"
+#include "main.h"
 
 /**
- * main - Base functionality of shell.
- *
- * Return: Always 0.
+ * main - open shell, project base
+ * Return: int
  */
+
 int main(void)
 {
-	int i = 0, turn = 0;
-	char *line = NULL;
-	char **args = NULL;
+	char *buff = NULL, **args;
+	size_t read_size = 0;
+	ssize_t buff_size = 0;
+	int exit_status = 0;
 
 	while (1)
 	{
-		line = readline();
-		if (!line)
+		if (isatty(0))
+			printf("hsh$ ");
+
+		buff_size = getline(&buff, &read_size, stdin);
+		if (buff_size == -1 || _strcmp("exit\n", buff) == 0)
+		{
+			free(buff);
 			break;
-		args = parse_line(line, " \n\t");
-		free(line);
-		if (!args[0])
-		{
-			for (i = 0; args[i]; i++)
-				free(args[i]);
-			free(args);
-			continue; }
-		else if (strcmp(args[0], "exit") == 0 && args[1] == NULL)
-		{
-			for (i = 0; args[i]; i++)
-				free(args[i]);
-			free(args);
-			exit(turn); }
-		else if (strcmp(args[0], "env") == 0)
-		{
-			for (i = 0; args[i]; i++)
-			free(args[i]);
-			free(args);
-			print_env();
-			continue; }
-		turn = execute_command(args);
+		}
+		buff[buff_size - 1] = '\0';
 
-		for (i = 0; args[i]; i++)
-			free(args[i]);
-		free(args); }
+		if (_strcmp("env", buff) == 0)
+		{
+			_env();
+			continue;
+		}
 
-	free(line);
-	if (turn)
-		exit(turn);
-	return (0);
+		if (empty_line(buff) == 1)
+		{
+			exit_status = 0;
+			continue;
+		}
+
+		args = _split(buff, " ");
+		args[0] = search_path(args[0]);
+
+		if (args[0] != NULL)
+			exit_status = execute(args);
+		else
+			perror("Error");
+		free(args);
+	}
+	return (exit_status);
 }
