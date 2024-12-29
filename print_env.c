@@ -1,18 +1,11 @@
-#include "shell.h"
-
-
-/**
- * print_env - Print environment.
- *
- *
- * Return: nothing.
- */
+#include "main.h"
 void print_env(void)
 {
-	char **env;
+	int i = 0;
 
-	for (env = environ; *env != NULL; env++)
+	while (environ[i])
 	{
-		printf("%s\n", *env);
+		printf("%s\n", environ[i]);
+		i++;
 	}
 }

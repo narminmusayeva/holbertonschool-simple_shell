@@ -1,50 +1,70 @@
 #include "main.h"
-
 /**
- * main - open shell, project base
- * Return: int
- */
-
-int main(void)
+  * main_helper - helper function for main
+  * @fcommand: tokenaized user command
+  * @status: status about echo
+  * @buf: user input
+  * Return: if break needed 1 else 0
+  */
+int main_helper(char **fcommand, int status, char *buf)
 {
-	char *buff = NULL, **args;
-	size_t read_size = 0;
-	ssize_t buff_size = 0;
-	int exit_status = 0;
+	if (fcommand == NULL)
+	{
+		free(buf), free_path();
+		if (status)
+			printf("\n");
+		return (1);
+	}
+	else if (!strcmp(fcommand[0], "exit"))
+	{
+		free(buf), free_path(), free(fcommand);
+		return (1);
+	}
+	return (0);
+}
+/**
+  * main - shell start function
+  * @argv: argument variables
+  * @argc: argument count
+  * @env: env variables
+  * Return: always 0
+  */
+int main(int argc, char **argv, char **env)
+{
+	char **fcommand, *buf, *command;
+	int status, lk = 0, r_code = 0;
 
+	(void)argc, path_var = get_path(env);
 	while (1)
 	{
-		if (isatty(0))
-			printf("hsh$ ");
-
-		buff_size = getline(&buff, &read_size, stdin);
-		if (buff_size == -1 || _strcmp("exit\n", buff) == 0)
-		{
-			free(buff);
+		status = isatty(STDIN_FILENO), print_prompt(status);
+		fcommand = get_command(&buf);
+		if (main_helper(fcommand, status, buf))
 			break;
-		}
-		buff[buff_size - 1] = '\0';
-
-		if (_strcmp("env", buff) == 0)
+		if (!strcmp(fcommand[0], " "))
 		{
-			_env();
+			free(buf), free(fcommand[0]), free(fcommand);
 			continue;
 		}
-
-		if (empty_line(buff) == 1)
+		command = strdup(fcommand[0]);
+		if (!strcmp("env", fcommand[0]))
 		{
-			exit_status = 0;
+			print_env(), free(buf), free(fcommand), free(command);
 			continue;
 		}
-
-		args = _split(buff, " ");
-		args[0] = search_path(args[0]);
-
-		if (args[0] != NULL)
-			exit_status = execute(args);
-		else
-			perror("Error");
-		free(args);
+		fcommand[0] = find_file(fcommand[0], &lk);
+		if (!fcommand[0])
+		{
+			fprintf(stderr, "%s: 1: %s: not found\n", argv[0], command);
+			free(buf), free(fcommand), free(command), errno = 0;
+			if (!status)
+				free_path(), exit(127);
+			continue;
+		}
+		r_code = exec_c(fcommand), free(buf);
+		if (lk)
+			free(fcommand[0]), lk = 0;
+		free(fcommand), free(command);
 	}
-	return (exit_status);
+	return (r_code);
 }

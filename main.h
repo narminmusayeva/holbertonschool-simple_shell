@@ -1,28 +1,23 @@
-#ifndef SHELL_H
-#define SHELL_H
-
-/*LIBRARIES*/
+#ifndef MAINH
+#define MAINH
+#define PATH "PATH="
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
-/*PROTOTYPES*/
-int _strcmp(char *s1, char *s2);
-char *_strcpy(char *dest, char *src);
-char *search_path(char *command);
-char **_split(char *str, char *sep);
-char *_strcat(char *dest, char *src);
-int _strlen(char *s);
-char *_getenv(char *env_var);
-void *_calloc(unsigned int nmemb, unsigned int size);
-void _env(void);
-int execute(char **args);
-int empty_line(char *buff);
-
-/* GLOBAL VAR*/
+extern char **path_var;
 extern char **environ;
-
+char **_strtok(char *str, char delim);
+int exec_c(char **fcommand);
+char **get_command(char **);
+char **get_path(char **);
+char *find_file(char *command, int *);
+void print_prompt(int status);
+void free_path(void);
+void print_env(void);
 #endif
