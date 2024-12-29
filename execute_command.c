@@ -21,10 +21,10 @@ int execute_command(char **args)
 		strcpy(fullPath, args[0]);
 		flag = 1;
 		child_pid = fork(); }
-	else if (getenv("PATH") && strcmp(getenv("PATH"), "") != 0)
+	else if (environ("PATH") && strcmp(environ("PATH"), "") != 0)
 	{
-		path = malloc(strlen(getenv("PATH")) * sizeof(char *));
-		strcpy(path, getenv("PATH"));
+		path = malloc(strlen(environ("PATH")) * sizeof(char *));
+		strcpy(path, environ("PATH"));
 		pathArr = parse_line(path, ":");
 		if (!path || !pathArr)
 			perror("malloc");
